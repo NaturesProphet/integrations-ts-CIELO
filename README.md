@@ -4,9 +4,9 @@ Com esta biblioteca typescript podemos:
 
 > 1: Validar dados de cartões
 
-> 2:  Cadastrar cartões na API da Cielo, obtendo tokens seguros apra serem armazenados e usados no lugar do número do cartão
+> 2:  Cadastrar cartões na API da Cielo, obtendo tokens seguros para serem armazenados e usados no lugar do número do cartão
 
-> 3:  Criar transaçẽos (Vendas!).
+> 3:  Criar transaçoes (Vendas!).
 
 exemplos de uso estão no arquivo src/testes.ts, para rodar esses testes, execute:
 
