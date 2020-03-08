@@ -6,6 +6,15 @@ export class CieloCreateSaleDto {
    * 	Numero de identificação do pedido no sistema do logista
    */
   MerchantOrderId: string;
+
+  /**
+   * Booleano que identifica que a autorização deve ser com captura automática.\
+   * Indica se a cobrança será de fato processada ou se trata-se de um teste do cartão.\
+   * false = teste.\
+   * true = cobrar.
+   */
+  capture: boolean;
+
   /**
    * Dados do comprador
    */

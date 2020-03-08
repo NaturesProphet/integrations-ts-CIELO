@@ -42,6 +42,7 @@ async function Teste () {
       Name: 'Cliente de teste'
     },
     MerchantOrderId: '123',
+    capture: true,
     Payment: {
       Amount: 100,
       Installments: 1,
@@ -54,7 +55,7 @@ async function Teste () {
     }
   }
   let sale = await cieloCreateSale( dtoSale );
-  console.log( `\n-----\nVenda efetuada:\n${sale.Payment}\n-----\n` );
+  console.log( `\n-----\nVenda efetuada\n${JSON.stringify( sale, null, 2 )}\n-----\n` );
 
 
 }
