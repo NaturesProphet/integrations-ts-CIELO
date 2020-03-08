@@ -1,0 +1,35 @@
+{
+  "name": "integrations-ts-cielo",
+  "version": "0.0.0",
+  "description": "bibliotecas de integração com a api ecommerce da CIELO",
+  "main": "src/testes.ts",
+  "scripts": {
+    "start": "ts-node src/testes.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NaturesProphet/integrations-ts-CIELO.git"
+  },
+  "keywords": [
+    "cielo",
+    "e-commerce",
+    "integrations"
+  ],
+  "author": "Mateus Garcia",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/NaturesProphet/integrations-ts-CIELO/issues"
+  },
+  "homepage": "https://github.com/NaturesProphet/integrations-ts-CIELO#readme",
+  "dependencies": {
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5",
+    "typescript": "^3.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^13.9.0",
+    "@types/request-promise": "^4.1.45",
+    "dotenv": "^8.2.0",
+    "ts-node": "^8.6.2"
+  }
+}
