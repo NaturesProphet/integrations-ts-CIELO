@@ -1,11 +1,12 @@
 require( 'dotenv' ).config();
 import { CieloCreateCardDto } from "./integrations/CIELO/DTOs/createCard.cielo.dto";
-import { cieloCreateCardToken, cieloCreateSale, cieloValidateCard } from './integrations/CIELO/functions.cielo';
+import { cieloCreateCardToken, cieloCreateSale, cieloValidateCard, cieloGetTransactionData, cieloCancelSale } from './integrations/CIELO/functions.cielo';
 import { CieloCreateSaleDto } from "./integrations/CIELO/DTOs/createSale.cielo.dto";
 import { CieloZeroauthValidationDto } from "./integrations/CIELO/DTOs/zeroauth.cielo.dto";
 
 async function Teste () {
   let cardToken: string;
+  let paymentId: string;
 
   // // Validar o cartão
   // let dtoCheck: CieloZeroauthValidationDto = {
@@ -39,7 +40,11 @@ async function Teste () {
   console.log( 'Iniciando uma venda....' );
   let dtoSale: CieloCreateSaleDto = {
     Customer: {
-      Name: 'Cliente de teste'
+      Name: 'Cliente de teste',
+      Birthdate: new Date(),
+      Email: 'nome@server.com',
+      Identity: "12312312300",
+      IdentityType: "CPF"
     },
     MerchantOrderId: '123',
     capture: true,
@@ -55,7 +60,18 @@ async function Teste () {
     }
   }
   let sale = await cieloCreateSale( dtoSale );
-  console.log( `\n-----\nVenda efetuada\n${JSON.stringify( sale, null, 2 )}\n-----\n` );
+  paymentId = sale.Payment.PaymentId;
+  console.log( `\n-----\nVenda efetuada\n${sale.Payment.ReturnMessage}\n-----\n` );
+
+  // consultando dados da transação
+  let data = await cieloGetTransactionData( paymentId );
+  console.log( `\n-----\nDados da transação:\n ${JSON.stringify( data, null, 2 )} \n-----\n` );
+
+
+  // CANCELANDO OPERAÇÃO
+  console.log( `\n-----\nCancelando operação.....\n-----\n` );
+  let data2 = await cieloCancelSale( paymentId );
+  console.log( `\n-----\nResultado:\n-----\n${JSON.stringify( data2, null, 2 )}` );
 
 
 }

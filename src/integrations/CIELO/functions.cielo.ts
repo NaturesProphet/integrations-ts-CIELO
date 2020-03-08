@@ -2,13 +2,13 @@ import { CieloCreateCardDto } from "./DTOs/createCard.cielo.dto";
 import { CieloResponseCreateCardInterface } from './responseSchemas/createCard.response.cielo';
 import { CieloCreateSaleDto } from './DTOs/createSale.cielo.dto';
 import { CieloResponseCreateSaleInterface } from './responseSchemas/createSale.cielo.response';
-import { post, Options } from 'request-promise';
+import { post, put, get, Options } from 'request-promise';
 import { CieloZeroauthValidationDto } from './DTOs/zeroauth.cielo.dto';
 import {
-  cieloURLRequest, cieloEndpointForCards,
+  cieloURLRequest, cieloEndpointForCards, cieloURLQuery,
   cieloMerchantId, cieloMerchantKey, cieloEndpointForSales, cieloEndpointForZeroauthValidation
 } from '../../common/configs/cielo.config';
-
+import { CieloFullResponseInterface } from './responseSchemas/fullResponse.cielo.response';
 
 /**
  * Cadastra um novo cartão na API da Cielo e retorna um 
@@ -118,10 +118,52 @@ export async function cieloValidateCard ( dto: CieloZeroauthValidationDto ) {
       'merchantKey': cieloMerchantKey
     }
   }
-  console.log( JSON.stringify( options, null, 2 ) )
   return await post( options );
 }
 
 
+
+/**
+ * Cancela uma venda através de seu ID de transação na Cielo
+ * @param paymentId ID de uma transação da Cielo
+ */
+export async function cieloCancelSale ( paymentId: string ) {
+  let options: Options = {
+    uri: `${cieloURLRequest}${cieloEndpointForSales}${paymentId}/void`,
+    json: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'Request-Promise',
+      'merchantId': cieloMerchantId,
+      'merchantKey': cieloMerchantKey
+    }
+  }
+  let res = await put( options );
+  if ( res.Status != 10 ) {
+    throw new Error( `Operação não foi cancelada. ${JSON.stringify( res, null, 2 )}` );
+  }
+  return res;
+}
+
+
+
+
+/**
+ * Consulta dados de uma transação específica pelo seu ID na Cielo
+ * @param paymentId ID de uma transação da Cielo
+ */
+export async function cieloGetTransactionData ( paymentId: string ): Promise<CieloFullResponseInterface> {
+  let options: Options = {
+    uri: `${cieloURLQuery}${cieloEndpointForSales}${paymentId}/`,
+    json: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'Request-Promise',
+      'merchantId': cieloMerchantId,
+      'merchantKey': cieloMerchantKey
+    }
+  }
+  return await get( options );
+}
 
 
