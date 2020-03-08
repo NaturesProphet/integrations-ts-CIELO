@@ -82,7 +82,8 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
       break;
 
     case '99':
-      if ( paymentData.Payment.ReturnMessage == 'Time Out' ) {
+      if ( paymentData.Payment.ReturnMessage == 'Time Out'
+        || paymentData.Payment.ReturnMessage == 'Timed Out' ) {
         throw new Error( `Time Out. Tente novamente daqui a pouco` );
       }
       else if ( paymentData.Payment.ReturnMessage == 'Operation Successful' ) {
