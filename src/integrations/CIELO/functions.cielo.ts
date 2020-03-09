@@ -6,9 +6,10 @@ import { post, put, get, Options } from 'request-promise';
 import { CieloZeroauthValidationDto } from './DTOs/zeroauth.cielo.dto';
 import {
   cieloURLRequest, cieloEndpointForCards, cieloURLQuery,
-  cieloMerchantId, cieloMerchantKey, cieloEndpointForSales, cieloEndpointForZeroauthValidation
+  cieloMerchantId, cieloMerchantKey, cieloEndpointForSales, cieloEndpointForZeroauthValidation, cieloEndpointForCardBin
 } from '../../common/configs/cielo.config';
 import { CieloFullResponseInterface } from './responseSchemas/fullResponse.cielo.response';
+import { CieloCardBinResponseInterface } from './responseSchemas/bin.interface';
 
 /**
  * Cadastra um novo cartão na API da Cielo e retorna um 
@@ -167,3 +168,30 @@ export async function cieloGetTransactionData ( paymentId: string ): Promise<Cie
 }
 
 
+
+
+
+/**
+ * Consulta BIN da Cielo. Retorna informações úteis para validação 
+ * de dados do cartão antes de cadastrar. \
+ * É necessário solicitar a 
+ * ativação deste recurso com a equipe de suporte da Cielo.
+ * @param bin BIN são os 6 primeiros dígitos do cartão.
+ */
+export async function cieloQueryCardBin ( bin: string ) {
+
+  const options: Options = {
+    uri: `${cieloURLRequest}${cieloEndpointForCardBin}${bin}`,
+    json: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'Request-Promise',
+      'Merchantid': cieloMerchantId,
+      'Merchantkey': cieloMerchantKey
+    }
+  };
+
+  let res: CieloCardBinResponseInterface = await get( options );
+  return res;
+
+}

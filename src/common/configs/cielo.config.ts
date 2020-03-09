@@ -36,3 +36,8 @@ export const cieloEndpointForCards = process.env.CIELO_CARDS_ENDPOINT;
  */
 export const cieloEndpointForZeroauthValidation = process.env.CIELO_ZEROAUTH_ENDPOINT;
 
+
+/**
+ * Endpoint para verificação de dados do cartão através do recurso BIN da Cielo.
+ */
+export const cieloEndpointForCardBin = process.env.CIELO_CARDBIN_ENDPOINT;
