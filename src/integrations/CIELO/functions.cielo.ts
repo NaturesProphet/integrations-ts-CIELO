@@ -8,6 +8,7 @@ import {
   cieloURLRequest, cieloEndpointForCards, cieloURLQuery,
   cieloMerchantId, cieloMerchantKey, cieloEndpointForSales, cieloEndpointForZeroauthValidation, cieloEndpointForCardBin
 } from '../../common/configs/cielo.config';
+
 import { CieloFullResponseInterface } from './responseSchemas/fullResponse.cielo.response';
 import { CieloCardBinResponseInterface } from './responseSchemas/bin.interface';
 
@@ -30,10 +31,16 @@ export async function cieloCreateCardToken ( dto: CieloCreateCardDto ): Promise<
     }
   }
 
-  return await post( options );
-
+  try {
+    return await post( options );
+  } catch ( err ) {
+    if ( err.message ) {
+      throw new Error( `Erro ao fazer a requisição à Cielo: ${err.message}` );
+    } else {
+      throw new Error( 'Erro ao fazer a requisição à Cielo.' );
+    }
+  }
 }
-
 
 /**
  * Cria uma nova venda na API da Cielo utilizando 
@@ -53,7 +60,16 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
     }
   }
 
-  let paymentData: CieloResponseCreateSaleInterface = await post( options );
+  let paymentData: CieloResponseCreateSaleInterface;
+  try {
+    paymentData = await post( options );
+  } catch ( err ) {
+    if ( err.message ) {
+      throw new Error( `Erro ao fazer a requisição de pagamentos à Cielo: ${err.message}` );
+    } else {
+      throw new Error( 'Erro ao fazer a requisição de pagamentos à Cielo.' );
+    }
+  }
 
   switch ( paymentData.Payment.ReturnCode ) {
     case '4':
@@ -62,6 +78,10 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
 
     case '05':
       throw new Error( `Não Autorizado` );
+      break;
+
+    case '6':
+      return paymentData;
       break;
 
     case '57':
@@ -94,8 +114,15 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
       break;
 
     default:
-      throw new Error( `Erro ao processar pagamento\n.`
-        + ` ${JSON.stringify( paymentData, null, 2 )}` );
+      if ( paymentData && paymentData.Payment ) {
+        throw new Error( `Erro ao processar pagamento: `
+          + `Cielo ReturnCode: ${paymentData.Payment.ReturnCode} `
+          + `Cielo ReturnMessage: ${paymentData.Payment} `
+          + `Cielo Status: ${paymentData.Payment.Status}` );
+      }
+      else {
+        throw new Error( `Erro inesperado ao processar pagamento.` );
+      }
       break;
   }
 }
@@ -119,7 +146,17 @@ export async function cieloValidateCard ( dto: CieloZeroauthValidationDto ) {
       'merchantKey': cieloMerchantKey
     }
   }
-  return await post( options );
+
+  try {
+    return await post( options );
+  } catch ( err ) {
+    if ( err.message ) {
+      throw new Error( `Erro ao fazer a requisição à Cielo: ${err.message}` );
+    } else {
+      throw new Error( 'Erro ao fazer a requisição à Cielo.' );
+    }
+
+  }
 }
 
 
@@ -191,7 +228,44 @@ export async function cieloQueryCardBin ( bin: string ) {
     }
   };
 
-  let res: CieloCardBinResponseInterface = await get( options );
-  return res;
-
+  try {
+    let res: CieloCardBinResponseInterface = await get( options );
+    return res;
+  } catch ( err ) {
+    if ( err.message ) {
+      throw new Error( `Erro ao fazer a requisição à Cielo: ${err.message}` );
+    } else {
+      throw new Error( 'Erro ao fazer a requisição à Cielo.' );
+    }
+  }
 }
+
+
+/**
+ * Captura uma transação
+ * @param paymentId ID de uma transação da Cielo
+ */
+export async function cieloCapture ( paymentId: string ) {
+  const options: Options = {
+    uri: `${cieloURLRequest}${cieloEndpointForSales}${paymentId}/capture`,
+    json: true,
+    headers: {
+      'Content-Type': 'application/json',
+      'User-Agent': 'Request-Promise',
+      'Merchantid': cieloMerchantId,
+      'Merchantkey': cieloMerchantKey
+    }
+  };
+
+  try {
+    let res = await put( options );
+    return res;
+  } catch ( err ) {
+    if ( err.message ) {
+      throw new Error( `Erro ao fazer a requisição à Cielo: ${err.message}` );
+    } else {
+      throw new Error( 'Erro ao fazer a requisição à Cielo.' );
+    }
+  }
+}
+
