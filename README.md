@@ -12,7 +12,9 @@ Com esta biblioteca typescript podemos:
 
 > 5: Cancelar (estornar) transações
 
-exemplos de uso estão no arquivo src/testes.ts, para rodar esses testes, execute:
+exemplos de uso estão nos arquivos src/credit.test.ts e src/debit.test.ts
+
+### Executar os testes
 
 Testar pagamento com cartão de crédito tokenizado:
 
