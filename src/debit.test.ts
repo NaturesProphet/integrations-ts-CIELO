@@ -82,8 +82,7 @@ async function createSale ( token ) {
     SoftDescriptor: 'minha loja',
     DebitCard: card,
     ReturnUrl: 'http://www.cielo.com.br',
-    Authenticate: true,
-    Capture: true
+    Authenticate: true
   }
 
   try {
