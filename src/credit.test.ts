@@ -1,10 +1,11 @@
 require( 'dotenv' ).config();
-import { CieloCreateCardDto } from './integrations/CIELO/DTOs/createCard.cielo.dto';
-import { cieloCreateCardToken, cieloCreateSale, cieloCapture, cieloCancelSale, cieloValidateCard, cieloQueryCardBin, cieloGetTransactionData } from './integrations/CIELO/functions.cielo';
-import { CieloCreateSaleDto } from './integrations/CIELO/DTOs/createSale.cielo.dto';
+import {
+  cieloCreateCardToken, cieloCreateSale, cieloCapture, cieloCancelSale,
+  cieloGetTransactionData, cieloValidateCardBIN, cieloGetStatusMessageFromSale
+} from './integrations/CIELO/functions.cielo';
 import { CieloPaymentCreditCardToken }
   from './integrations/CIELO/class/paymentCreditCardToken.cieloclass';
-import { CieloCreditCardToken } from './integrations/CIELO/class/creditCardToken.cieloclass';
+import { CieloCardToken } from './integrations/CIELO/class/creditCardToken.cieloclass';
 import { CieloCommonCard } from './integrations/CIELO/class/commonCard.cieloclass';
 import { CieloCustomer } from './integrations/CIELO/class/customer.cieloclass';
 
@@ -29,16 +30,14 @@ async function binValidate () {
   console.log( `\n--------` );
   console.log( `Validando os dados....` );
   console.log( `--------` );
-  let info = await cieloQueryCardBin( myCard.CardNumber.substr( 0, 6 ) );
-  if (
-    !( info.CardType == 'Credito' || info.CardType == 'Multiplo' ) ||
-    !( info.Provider == 'VISA' ) ||
-    !( info.Status == '00' )
-  ) {
-    throw Error( `Dados inválidos` );
-  } else {
-    console.log( 'Dados são válidos....\n' )
-  }
+  return await cieloValidateCardBIN( {
+    Brand: <any>myCard.Brand,
+    CardNumber: myCard.CardNumber,
+    CardType: 'CreditCard',
+    ExpirationDate: myCard.ExpirationDate,
+    Holder: myCard.Holder,
+    SecurityCode: myCard.SecurityCode
+  } );
 
 }
 
@@ -71,7 +70,7 @@ async function createSale ( token ) {
     Name: myCard.Holder
   };
 
-  let card: CieloCreditCardToken = {
+  let card: CieloCardToken = {
     Brand: myCard.Brand,
     CardToken: token,
     SecurityCode: myCard.SecurityCode
@@ -131,6 +130,9 @@ async function cancelSale ( paymentId ) {
 async function testImplementation () {
 
   await binValidate();
+  console.log( 'Cartão Ok.' )
+
+
   let token = ( await createToken() ).CardToken;
   console.log( `Token gerado: ${token}\n` );
 
@@ -143,29 +145,29 @@ async function testImplementation () {
   console.log( `Verificando os dados da transação não capturada....` );
   console.log( `--------` );
   let situation = await getSaleInfo( sale.Payment.PaymentId );
-  console.log( `Situação da transação: ${situation.Payment.Status}\n` );
+  console.log( `Situação da transação: ${cieloGetStatusMessageFromSale( situation.Payment.Status )}\n` );
 
 
   let captureData = await capture( sale.Payment.PaymentId );
-  console.log( `Situação da transação: ${captureData.Status}\n` );
+  console.log( `Situação da transação: ${cieloGetStatusMessageFromSale( captureData.Status )}\n` );
 
 
   console.log( `\n--------` );
   console.log( `Verificando os dados da transação capturada....` );
   console.log( `--------` );
   situation = await getSaleInfo( sale.Payment.PaymentId );
-  console.log( `Situação da transação: ${situation.Payment.Status}\n` );
+  console.log( `Situação da transação: ${cieloGetStatusMessageFromSale( situation.Payment.Status )}\n` );
 
 
-  let cancelData = cancelSale( sale.Payment.PaymentId );
-  console.log( `Situação do cancelamento: ${( await cancelData ).Status}\n` );
+  let cancelData = await cancelSale( sale.Payment.PaymentId );
+  console.log( `Situação da transação: ${cieloGetStatusMessageFromSale( cancelData.Status )}` );
 
 
   console.log( `\n--------` );
   console.log( `Verificando os dados da transação cancelada....` );
   console.log( `--------` );
   situation = await getSaleInfo( sale.Payment.PaymentId );
-  console.log( `Situação da transação: ${situation.Payment.Status}\n` );
+  console.log( `Situação da transação: ${cieloGetStatusMessageFromSale( situation.Payment.Status )} \n` );
 
 
   console.log( `\n\nTODOS OS TESTES PASSARAM SEM ERRO.\n\n` )

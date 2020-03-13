@@ -4,7 +4,8 @@
   "description": "bibliotecas de integração com a api ecommerce da CIELO",
   "main": "src/testes.ts",
   "scripts": {
-    "start": "ts-node src/testes.ts"
+    "start": "ts-node src/credit.test.ts",
+    "start:debit": "ts-node src/debit.test.ts"
   },
   "repository": {
     "type": "git",

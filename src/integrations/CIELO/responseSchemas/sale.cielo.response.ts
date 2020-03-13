@@ -145,7 +145,9 @@ export interface CieloSaleResponseInterface {
     PaymentId?: string;
 
     /**
-     * Tipo de pagamento (crédito/débito)
+     * Tipo de pagamento (crédito/débito). \
+     * DebitCard \
+     * CreditCard
      */
     Type?: string;
 

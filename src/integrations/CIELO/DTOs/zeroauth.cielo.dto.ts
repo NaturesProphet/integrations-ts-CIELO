@@ -2,7 +2,7 @@
 /**
  * Formulário do ZEROAUTH para validação de dados do cartão
  */
-export class CieloZeroauthValidationDto {
+export class CieloValidateCardDto {
   /**
    * Define o tipo de cartão utilizados: \
     * CreditCard \

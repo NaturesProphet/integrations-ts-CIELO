@@ -1,12 +1,11 @@
 import { CieloPayment } from "./abstract/payment.cieloclass";
-import { CieloCommonCard } from './commonCard.cieloclass';
-import { CieloCreditCardToken } from "./creditCardToken.cieloclass";
+import { CieloCardToken } from "./creditCardToken.cieloclass";
 
 
 export class CieloPaymentCreditCardToken extends CieloPayment {
 
 
-  CreditCard: CieloCreditCardToken;
+  CreditCard: CieloCardToken;
 
 }
 

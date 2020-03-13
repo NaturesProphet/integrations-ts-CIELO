@@ -10,7 +10,7 @@
       "name": "Depurar Projeto",
       "protocol": "inspector",
       "args": [
-        "${workspaceRoot}/src/testes.ts"
+        "${workspaceRoot}/src/credit.test.ts"
       ],
       "cwd": "${workspaceRoot}",
       "runtimeArgs": [

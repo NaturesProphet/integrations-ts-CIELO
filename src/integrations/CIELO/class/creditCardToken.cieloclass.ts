@@ -1,6 +1,6 @@
 import { CieloCard } from "./abstract/card.cieloclass";
 
-export class CieloCreditCardToken extends CieloCard {
+export class CieloCardToken extends CieloCard {
   /**
    * Token de identificação do Cartão.
    */

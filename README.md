@@ -14,13 +14,26 @@ Com esta biblioteca typescript podemos:
 
 exemplos de uso estão no arquivo src/testes.ts, para rodar esses testes, execute:
 
+Testar pagamento com cartão de crédito tokenizado:
+
 ```
 npm start
 ```
 
 resultado:
 
-![Teste](print.jpeg)
+![Teste Credito](credito.png)
+
+
+Testar pagamento com cartão de débito tokenizado:
+
+```
+npm run start:debit
+```
+
+resultado:
+
+![Teste Debito](debito.png)
 
 ## Configuração
 

@@ -3,10 +3,11 @@ import { CieloResponseCreateCardInterface } from './responseSchemas/createCard.r
 import { CieloCreateSaleDto } from './DTOs/createSale.cielo.dto';
 import { CieloResponseCreateSaleInterface } from './responseSchemas/createSale.cielo.response';
 import { post, put, get, Options } from 'request-promise';
-import { CieloZeroauthValidationDto } from './DTOs/zeroauth.cielo.dto';
+import { CieloValidateCardDto } from './DTOs/zeroauth.cielo.dto';
 import {
   cieloURLRequest, cieloEndpointForCards, cieloURLQuery,
-  cieloMerchantId, cieloMerchantKey, cieloEndpointForSales, cieloEndpointForZeroauthValidation, cieloEndpointForCardBin
+  cieloMerchantId, cieloMerchantKey, cieloEndpointForSales,
+  cieloEndpointForZeroauthValidation, cieloEndpointForCardBin
 } from '../../common/configs/cielo.config';
 
 import { CieloSaleResponseInterface } from './responseSchemas/sale.cielo.response';
@@ -71,63 +72,118 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
       throw new Error( 'Erro ao fazer a requisição de pagamentos à Cielo.' );
     }
   }
-
-  switch ( paymentData.Payment.ReturnCode ) {
-    case '4':
+  switch ( paymentData.Payment.Status ) {
+    case 0:
       return paymentData;
       break;
-
-    case '05':
-      throw new Error( `Não Autorizado` );
-      break;
-
-    case '6':
+    case 1:
       return paymentData;
       break;
-
-    case '57':
-      throw new Error( `Cartão Expirado` );
+    case 2:
+      return paymentData;
       break;
-
-    case '70':
-      throw new Error( `Problemas com o Cartão de Crédito! `
-        + `Verifique os dados. Se o problema persistir, `
-        + `contate a sua administradora do cartão` );
-      break;
-
-    case '77':
-      throw new Error( `Cartão Cancelado` );
-      break;
-
-    case '78':
-      throw new Error( `Cartão Bloqueado` );
-      break;
-
-    case '99':
-      if ( paymentData.Payment.ReturnMessage == 'Time Out'
-        || paymentData.Payment.ReturnMessage == 'Timed Out' ) {
-        throw new Error( `Time Out. Tente novamente daqui a pouco` );
-      }
-      else if ( paymentData.Payment.ReturnMessage == 'Operation Successful' ) {
-        // deu bom, só q meio estranho...
-        return paymentData;
-      }
-      break;
-
     default:
-      if ( paymentData && paymentData.Payment ) {
-        throw new Error( `Erro ao processar pagamento: `
-          + `Cielo ReturnCode: ${paymentData.Payment.ReturnCode} `
-          + `Cielo ReturnMessage: ${paymentData.Payment} `
-          + `Cielo Status: ${paymentData.Payment.Status}` );
+
+      switch ( paymentData.Payment.ReturnCode ) {
+        case '1':
+          throw new Error( `Não Autorizado. `
+            + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}\n${JSON.stringify( paymentData, null, 2 )}` );
+          break;
+        case '05':
+          throw new Error( `Não Autorizado. `
+            + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` );
+          break;
+
+        case '57':
+          throw new Error( `Cartão Expirado. `
+            + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` );
+          break;
+
+        case '70':
+          throw new Error( `Problemas com o Cartão de Crédito! `
+            + `Verifique os dados. Se o problema persistir, `
+            + `contate a sua administradora do cartão. `
+            + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` );
+          break;
+
+        case '77':
+          throw new Error( `Cartão Cancelado. `
+            + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` );
+          break;
+
+        case '78':
+          throw new Error( `Cartão Bloqueado. `
+            + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` );
+          break;
+
+        case '99':
+          if ( paymentData.Payment.ReturnMessage == 'Time Out'
+            || paymentData.Payment.ReturnMessage == 'Timed Out' ) {
+            throw new Error( `Time Out. Tente novamente daqui a pouco. `
+              + `Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` );
+          }
+          else if ( paymentData.Payment.ReturnMessage == 'Operation Successful' ) {
+            // deu bom, só q meio estranho...
+            return paymentData;
+          }
+          break;
+
+        default:
+          if ( paymentData && paymentData.Payment ) {
+            throw new Error( `Erro ao processar pagamento: `
+              + `Cielo ReturnCode: ${paymentData.Payment.ReturnCode} `
+              + `Cielo ReturnMessage: ${paymentData.Payment.ReturnMessage} `
+              + `Cielo Status: ${cieloGetStatusMessageFromSale( paymentData.Payment.Status )}` +
+              `\n\n${JSON.stringify( paymentData, null, 2 )}\n\n` );
+          }
+          else {
+            throw new Error( `Erro inesperado ao processar pagamento.` );
+          }
+          break;
       }
-      else {
-        throw new Error( `Erro inesperado ao processar pagamento.` );
-      }
-      break;
   }
 }
 
+
+/**
+ * Função auxiliar para interpretar o Status dos pagamentos e 
+ * gerar uma mensagem de retorno apropriada.
+ * @param status Código de Payment.Status
+ */
+export function cieloGetStatusMessageFromSale ( status: number ): string {
+  switch ( status ) {
+    case 0:
+      return '0 (NotFinished) -  Aguardando atualização de status. (compra no débito aguardando autenticação?)';
+      break;
+    case 1:
+      return '1 (Authorized) - Pagamento apto a ser capturado ou definido como pago.'
+      break;
+    case 2:
+      return '2 (PaymentConfirmed) - Pagamento confirmado e finalizado.';
+      break;
+    case 3:
+      return '3 (Denied) - Pagamento negado por Autorizador.';
+      break;
+    case 10:
+      return '10 (voided) - Pagamento cancelado.';
+      break;
+    case 11:
+      return '11 (Refunded) - Pagamento cancelado após 23:59 do dia de autorização.';
+      break;
+    case 12:
+      return '12 (Pending) - Aguardando Status de instituição financeira.';
+      break;
+    case 13:
+      return '13 (Aborted) - Pagamento cancelado por falha no processamento ou por ação do AF';
+      break;
+    case 20:
+      return '20 - (Scheduled) - Recorrência agendada.';
+      break;
+    default:
+      return `0Código de status (${status}) desconhecido`;
+      break;
+  }
+}
 
 
 /**
@@ -137,7 +193,7 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
  * NÃO FUNCIONA NO SANDBOX -_-
  * @param dto Formulário de validação Zeroauth da Cielo para cartões.
  */
-export async function cieloValidateCard ( dto: CieloZeroauthValidationDto ) {
+export async function cieloValidateCardZeroAuth ( dto: CieloValidateCardDto ) {
   let options: Options = {
     uri: `${cieloURLRequest}${cieloEndpointForZeroauthValidation}`,
     body: dto,
@@ -158,8 +214,49 @@ export async function cieloValidateCard ( dto: CieloZeroauthValidationDto ) {
     } else {
       throw new Error( 'Erro ao fazer a requisição à Cielo.' );
     }
-
   }
+}
+
+
+/**
+ * Valida os dados de um cartão através do recurso QueryBIN da Cielo. \
+ * Essa função já implementa a validação da bandeira e do tipo de cartão, 
+ * retornando a resposta da cielo com esses campos já pré validados.
+ * @param dto Formulário de validação Zeroauth da Cielo para cartões.
+ */
+export async function cieloValidateCardBIN ( dto: CieloValidateCardDto ) {
+  let data = await cieloQueryCardBin( dto.CardNumber.substr( 0, 6 ) );
+
+  // validação da Bandeira
+  if ( dto.Brand == 'Elo' ) {
+    if ( data.Provider != 'ELO' ) {
+      throw new Error( `Bandeira do cartão (${data.Provider}) diferente do informado ${dto.Brand}` );
+    }
+  } else if ( dto.Brand == 'Master' ) {
+    if ( data.Provider != 'MASTER' ) {
+      throw new Error( `Bandeira do cartão (${data.Provider}) diferente do informado ${dto.Brand}` );
+    }
+  } else if ( dto.Brand == 'Visa' ) {
+    if ( data.Provider != 'VISA' ) {
+      throw new Error( `Bandeira do cartão (${data.Provider}) diferente do informado ${dto.Brand}` );
+    }
+  }
+
+
+  // validação do tipo de cartão
+  if ( dto.CardType == 'CreditCard' ) {
+    if ( data.CardType != 'Credito' && data.CardType != 'Multiplo' ) {
+      throw new Error( `O cartão informado não possui a modalidade Crédito. Atual: ${data.CardType}` );
+    }
+  } else if ( dto.CardType == 'DebitCard' ) {
+    if ( data.CardType != 'Debito' && data.CardType != 'Multiplo' ) {
+      throw new Error( `O cartão informado não possui a modalidade Débito. Atual: ${data.CardType}` );
+    }
+  }
+
+
+  // as validações iniciais passaram, então a resposta da cielo é retornada para maiores análises.
+  return data;
 }
 
 
@@ -231,9 +328,9 @@ export async function cieloQueryCardBin ( bin: string ) {
     }
   };
 
+  let res: CieloCardBinResponseInterface;
   try {
-    let res: CieloCardBinResponseInterface = await get( options );
-    return res;
+    res = await get( options );
   } catch ( err ) {
     if ( err.message ) {
       throw new Error( `Erro ao fazer a requisição à Cielo: ${err.message}` );
@@ -241,6 +338,23 @@ export async function cieloQueryCardBin ( bin: string ) {
       throw new Error( 'Erro ao fazer a requisição à Cielo.' );
     }
   }
+
+  if ( res ) {
+    if ( res.Status != '00' ) {
+      if ( res.Status == '01' ) {
+        throw new Error( `Bandeira não suportada. ${res.Provider}` );
+      } else if ( res.Status == '02' ) {
+        throw new Error( 'Cartão não suportado na consulta de bin' );
+      } else if ( res.Status == '73' ) {
+        throw new Error( 'Afiliação bloqueada' );
+      } else {
+        throw new Error( `Status ${res.Status} desconhecido.` );
+      }
+    }
+  } else {
+    throw new Error( `Erro desconhecido. Resposta vazia.` );
+  }
+  return res;
 }
 
 
