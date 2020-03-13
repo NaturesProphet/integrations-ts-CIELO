@@ -14,6 +14,10 @@ exemplos de uso estão no arquivo src/testes.ts, para rodar esses testes, execut
 npm start
 ```
 
+resultado:
+
+![Teste](print.jpeg)
+
 ## Configuração
 
 Copie o arquivo .env.example e renomeie para apenas .env, e então, configure suas credenciais e URLs de produção lá dentro.

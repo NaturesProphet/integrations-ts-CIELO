@@ -9,8 +9,9 @@ import {
   cieloMerchantId, cieloMerchantKey, cieloEndpointForSales, cieloEndpointForZeroauthValidation, cieloEndpointForCardBin
 } from '../../common/configs/cielo.config';
 
-import { CieloFullResponseInterface } from './responseSchemas/fullResponse.cielo.response';
-import { CieloCardBinResponseInterface } from './responseSchemas/bin.interface';
+import { CieloSaleResponseInterface } from './responseSchemas/sale.cielo.response';
+import { CieloCardBinResponseInterface } from './responseSchemas/bin.cielo.response';
+import { CieloResponseCaptureInterface } from './responseSchemas/capture.cielo.response';
 
 /**
  * Cadastra um novo cartão na API da Cielo e retorna um 
@@ -131,7 +132,9 @@ export async function cieloCreateSale ( dto: CieloCreateSaleDto ) {
 
 /**
  * Valida os dados de um cartão através do recurso Zeroauth da Cielo. \
- * Necessário cadastro requisitando o recurso Zeroauth
+ * Necessário cadastro requisitando o recurso Zeroauth. \
+ * \
+ * NÃO FUNCIONA NO SANDBOX -_-
  * @param dto Formulário de validação Zeroauth da Cielo para cartões.
  */
 export async function cieloValidateCard ( dto: CieloZeroauthValidationDto ) {
@@ -176,7 +179,7 @@ export async function cieloCancelSale ( paymentId: string ) {
       'merchantKey': cieloMerchantKey
     }
   }
-  let res = await put( options );
+  let res: CieloResponseCaptureInterface = await put( options );
   if ( res.Status != 10 ) {
     throw new Error( `Operação não foi cancelada. ${JSON.stringify( res, null, 2 )}` );
   }
@@ -190,7 +193,7 @@ export async function cieloCancelSale ( paymentId: string ) {
  * Consulta dados de uma transação específica pelo seu ID na Cielo
  * @param paymentId ID de uma transação da Cielo
  */
-export async function cieloGetTransactionData ( paymentId: string ): Promise<CieloFullResponseInterface> {
+export async function cieloGetTransactionData ( paymentId: string ): Promise<CieloSaleResponseInterface> {
   let options: Options = {
     uri: `${cieloURLQuery}${cieloEndpointForSales}${paymentId}/`,
     json: true,
@@ -218,7 +221,7 @@ export async function cieloGetTransactionData ( paymentId: string ): Promise<Cie
 export async function cieloQueryCardBin ( bin: string ) {
 
   const options: Options = {
-    uri: `${cieloURLRequest}${cieloEndpointForCardBin}${bin}`,
+    uri: `${cieloURLQuery}${cieloEndpointForCardBin}${bin}`,
     json: true,
     headers: {
       'Content-Type': 'application/json',
@@ -245,7 +248,7 @@ export async function cieloQueryCardBin ( bin: string ) {
  * Captura uma transação
  * @param paymentId ID de uma transação da Cielo
  */
-export async function cieloCapture ( paymentId: string ) {
+export async function cieloCapture ( paymentId: string ): Promise<CieloResponseCaptureInterface> {
   const options: Options = {
     uri: `${cieloURLRequest}${cieloEndpointForSales}${paymentId}/capture`,
     json: true,
@@ -258,8 +261,7 @@ export async function cieloCapture ( paymentId: string ) {
   };
 
   try {
-    let res = await put( options );
-    return res;
+    return <CieloResponseCaptureInterface>await put( options );
   } catch ( err ) {
     if ( err.message ) {
       throw new Error( `Erro ao fazer a requisição à Cielo: ${err.message}` );

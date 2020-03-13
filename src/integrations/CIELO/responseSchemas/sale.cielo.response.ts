@@ -1,8 +1,11 @@
+import { CieloResponseLinkInterface } from "./links.cielo.response";
+import { CieloCustomer } from '../class/customer.cieloclass';
+
 /**
  * Interface expondo todos os campos possíveis que a API da cielo pode retornar.\
  * Disponível em https://developercielo.github.io/manual/
  */
-export interface CieloFullResponseInterface {
+export interface CieloSaleResponseInterface {
   /**
    * 	Numero de identificação do Pedido.
    */
@@ -11,31 +14,7 @@ export interface CieloFullResponseInterface {
   /**
    * Dados do cliente
    */
-  Customer: {
-    /**
-     * Nome do cliente
-     */
-    Name: string;
-    /**
-    * CPF do cliente
-    */
-    Identity: string;
-
-    /**
-     * sempre definir como CPF
-     */
-    IdentityType: 'CPF';
-
-    /**
-     * email do cliente
-     */
-    Email: string;
-
-    /**
-     * Aniversário do cliente
-     */
-    Birthdate: Date;
-  }
+  Customer: CieloCustomer
 
   Payment?: {
     /**
@@ -219,7 +198,7 @@ export interface CieloFullResponseInterface {
      * Aparentemente trata-se de uma lista de ações qe podem ser executadas
      * via REST com os dados da transação atual.
      */
-    Links?: []
+    Links?: CieloResponseLinkInterface[]
   },
 
   /**

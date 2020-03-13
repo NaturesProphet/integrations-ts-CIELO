@@ -28,6 +28,6 @@ export class CieloCreateCardDto {
    * (Visa / Master / Elo ).
    */
   // amarrar ao enum "brand" ao ser validado.
-  Brand: 'Visa' | 'Master' | 'Elo';
+  Brand: 'Visa' | 'Master' | 'Amex' | 'Elo' | 'Aura' | 'JCB' | 'Diners' | 'Discover';
 }
 
