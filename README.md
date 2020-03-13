@@ -6,7 +6,11 @@ Com esta biblioteca typescript podemos:
 
 > 2:  Cadastrar cartões na API da Cielo, obtendo tokens seguros para serem armazenados e usados no lugar do número do cartão
 
-> 3:  Criar transaçoes (Vendas!).
+> 3: Criar transaçoes com ou sem captura automática (Vendas!).
+
+> 4: Capturar transações
+
+> 5: Cancelar (estornar) transações
 
 exemplos de uso estão no arquivo src/testes.ts, para rodar esses testes, execute:
 
