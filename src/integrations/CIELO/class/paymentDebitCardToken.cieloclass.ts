@@ -21,4 +21,16 @@ export class CieloPaymentDebitCardToken extends CieloPayment {
    */
   DebitCard: CieloCardToken;
 
+
+  /**
+ * Para autenticação externa com MPI 3DS 1.0 \
+ * Necessário contratação de serviço terceirizado de MPI
+ * https://developercielo.github.io/manual/cielo-ecommerce#autentica%C3%A7%C3%A3o-d%C3%A9bito-3ds-1.0
+ */
+  ExternalAuthentication?: {
+    Cavv: string;
+    Xid: string;
+    Eci: string;
+  }
+
 }

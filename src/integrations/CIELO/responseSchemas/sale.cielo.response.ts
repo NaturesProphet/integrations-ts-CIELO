@@ -181,12 +181,29 @@ export interface CieloSaleResponseInterface {
     ExtraDataCollection?: [],
 
     /**
-     * Status da Transação.
+     * Status da Transação. \
+     * 0 - (NotFinished) Aguardando atualização de status. ALL \
+     * 1 - (Authorized)  Pagamento apto a ser capturado ou definido como pago. ALL \
+     * 2 - (PaymentConfirmed) Pagamento confirmado e finalizado. ALL \
+     * 3 - (Denied) Pagamento negado por Autorizador. 	CC + CD + TF \
+     * 10 - (voided) Pagamento cancelado. 	ALL \
+     * 11 - (Refunded) Pagamento cancelado após 23:59 do dia de autorização. CC + CD\
+     * 12 - (Pending) Aguardando Status de instituição financeira. 	ALL\
+     * 13 - (Aborted) Pagamento cancelado por falha no processamento ou por ação do AF. ALL\
+     * 20 - (Scheduled) Recorrência agendada. CC
      */
     Status?: number;
 
     /**
-     * 	Código de retorno da Adquirência.
+     * Código de retorno da Adquirência. \
+     * 4 - operação realizada mas não capturada. \
+     * 6 - operação capturada. \
+     * 05 - Não autorizada. \
+     * 57 - Cartão expirado. \
+     * 70 - Problemas com o cartão. \
+     * 77 - Cartão cancelado. \
+     * 78 - Cartão bloqueado. \
+     * 99 - Time out ou sucesso (WTF!?!?!?)
      */
     ReturnCode?: string;
 
