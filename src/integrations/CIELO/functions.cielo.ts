@@ -277,7 +277,11 @@ export async function cieloCancelSale ( paymentId: string ) {
     }
   }
   let res: CieloResponseCaptureInterface = await put( options );
-  if ( res.Status != 10 ) {
+
+  /**
+   * Esse status 11 me deixa com dúvida.... ele é um erro ou um cancelamento ?? o_O
+   */
+  if ( res.Status != 10 && res.Status != 11 ) {
     throw new Error( `Operação não foi cancelada. ${JSON.stringify( res, null, 2 )}` );
   }
   return res;
