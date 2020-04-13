@@ -233,7 +233,7 @@ export async function cieloValidateCardBIN ( dto: CieloValidateCardDto ) {
       throw new Error( `Bandeira do cartão (${data.Provider}) diferente do informado ${dto.Brand}` );
     }
   } else if ( dto.Brand == 'Master' ) {
-    if ( data.Provider != 'MASTER' ) {
+    if ( data.Provider != 'MASTERCARD' ) {
       throw new Error( `Bandeira do cartão (${data.Provider}) diferente do informado ${dto.Brand}` );
     }
   } else if ( dto.Brand == 'Visa' ) {
